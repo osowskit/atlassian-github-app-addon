@@ -7,6 +7,20 @@ require 'sinatra'
 
 $stdout.sync = true
 
+begin
+  GITHUB_CLIENT_ID = ENV.fetch("GITHUB_CLIENT_ID")
+  GITHUB_CLIENT_SECRET =  ENV.fetch("GITHUB_CLIENT_SECRET")
+  GITHUB_APP_KEY = ENV.fetch("GITHUB_APP_KEY")
+  GITHUB_APP_ID = ENV.fetch("GITHUB_APP_ID")
+rescue KeyError
+  $stderr.puts "To run this script, please set the following environment variables:"
+  $stderr.puts "- GITHUB_CLIENT_ID: GitHub Developer Application Client ID"
+  $stderr.puts "- GITHUB_CLIENT_SECRET: GitHub Developer Application Client Secret"
+  $stderr.puts "- GITHUB_APP_KEY: GitHub App Private Key"
+  $stderr.puts "- GITHUB_APP_ID: GitHub App ID"
+  exit 1
+end
+
 use Rack::Session::Cookie, :secret => rand.to_s()
 set :protection, :frame_options => "ALLOW-FROM *"
 Octokit.default_media_type = "application/vnd.github.machine-man-preview+json"
