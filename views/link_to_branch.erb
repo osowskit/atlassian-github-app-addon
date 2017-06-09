@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+     <link rel="stylesheet" href="//aui-cdn.atlassian.com/aui-adg/5.9.12/css/aui.min.css" media="all">
+    <script src="<%= $fqdn %>/atlassian-connect/all.js"></script>
+  </head>
+   <body>
+      <div class="ac-content">
+        <div class="aui-message aui-message-info">
+          <p class="title">
+            View <a href="https://github.com/<%= session[:repo_name] %>/tree/<%= session[:branch_name] %>" target="_blank">branch</a> on GitHub
+          </p>
+        <div>
+      </div>
+      <a href="/logout">clear settings</a>
+   </body>
+</html>
