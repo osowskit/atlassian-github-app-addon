@@ -36,17 +36,6 @@ get '/callback' do
   redirect to('/')
 end
 
-# Handle GitHub App webhook events
-post '/payload' do
-  github_event = request.env['HTTP_X_GITHUB_EVENT']
-  if github_event == "integration_installation" || github_event == "installation_repositories"
-    parse_installation_payload(request.body.read)
-  else
-    puts "New event #{github_event}"
-  end
-
-end
-
 # Entry point for JIRA Add-on.
 # JIRA passes in a number of URL parameters https://goo.gl/zyGLiF
 get '/main_entry' do
@@ -103,7 +92,6 @@ get '/' do
     end
   end
 end
-
 
 # Clear all session information
 get '/logout' do
@@ -251,29 +239,6 @@ def get_app_token(access_tokens_url)
   app_token = JSON.parse(response)
   app_token["token"]
 end
-
-
-def parse_installation_payload(json_body)
-  webhook_data = JSON.parse(json_body)
-  if webhook_data["action"] == "created" || webhook_data["action"] == "added"
-    access_tokens_url = webhook_data["installation"]["access_tokens_url"]
-    # Get token for app
-    app_token = get_app_token(access_tokens_url)
-    
-    repository_list = []
-    if webhook_data["installation"].key?("repositories_added")
-      webhook_data["installation"]["repositories_added"].each do |repo|
-        repository_list.push(repo["full_name"])
-      end
-    else
-      # Get repositories by query
-      repository_list = get_app_repositories(app_token) 
-    end
-    
-    create_issues(app_token, repository_list, webhook_data["sender"]["login"])
-  end
-end
-
 
 # Octokit methods
 # -----------------
