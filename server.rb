@@ -65,8 +65,7 @@ get '/' do
       end
       token_url = "https://api.github.com/installations/#{session[:installation_id]}/access_tokens"
       session[:app_token] = get_app_token(token_url)
-      puts session[:app_token]
-      return session[:app_token]
+      redirect to('/')
     else
       if !set_repo?
         @name_list = [] 
