@@ -14,7 +14,7 @@
       "webPanels": [
          {
             "url": "/main_entry",
-            "key": ":banana:s",
+            "key": "osowskit-app",
             "location": "atl.jira.view.issue.right.context",
             "name": {
                "value": "GitHub Development"
