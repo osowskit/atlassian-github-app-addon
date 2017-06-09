@@ -1,0 +1,25 @@
+{
+   "key": "com.atlassian.jira.static.osowskit.app",
+   "name": "GitHub App Plugin for JIRA",	
+   "description": "GitHub Add-on for creating branches",
+   "vendor": {
+      "name": "T Osowski",
+      "url": "https://github.com"
+   },
+   "baseUrl": "https://atlassian-github-app-addon.herokuapp.com/",
+   "authentication": {
+      "type": "none"
+   },
+   "modules": {
+      "webPanels": [
+         {
+            "url": "/main_entry",
+            "key": ":banana:s",
+            "location": "atl.jira.view.issue.right.context",
+            "name": {
+               "value": "GitHub Development"
+            }
+         }
+      ]
+   }
+}
