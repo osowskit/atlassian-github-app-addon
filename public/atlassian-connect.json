@@ -1,5 +1,5 @@
 {
-   "key": "com.atlassian.jira.static.osowskit.app",
+   "key": "com.osowskit.jira.github.app",
    "name": "GitHub App Plugin for JIRA",	
    "description": "GitHub Add-on for creating branches",
    "vendor": {
