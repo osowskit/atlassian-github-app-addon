@@ -21,6 +21,23 @@ rescue KeyError
   exit 1
 end
 
+configure do
+    enable :cross_origin
+end
+
+before do
+    response.headers['Access-Control-Allow-Origin'] = 'https://*.atlassian.net'
+end
+
+options "*" do
+    response.headers["Allow"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Accept, X-User-Email, X-Auth-Token"
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["X-Content-Security-Policy"] = "frame-ancestors https://*.atlassian.net";
+    response.headers["Content-Security-Policy"] = "frame-ancestors https://*.atlassian.net";
+    200
+end
+
 use Rack::Session::Cookie, :secret => rand.to_s()
 set :protection, :frame_options => "ALLOW-FROM *"
 Octokit.default_media_type = "application/vnd.github.machine-man-preview+json"
