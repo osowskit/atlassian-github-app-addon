@@ -39,7 +39,7 @@ options "*" do
 end
 
 use Rack::Session::Cookie, :secret => rand.to_s()
-set :protection, :frame_options => "ALLOW-FROM *"
+#set :protection, :frame_options => "ALLOW-FROM *"
 Octokit.default_media_type = "application/vnd.github.machine-man-preview+json"
 
 # Sinatra Endpoints
