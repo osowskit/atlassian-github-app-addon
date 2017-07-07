@@ -40,7 +40,7 @@ end
 # JIRA passes in a number of URL parameters https://goo.gl/zyGLiF
 get '/main_entry' do
   # Handle loading outside of JIRA environment
-  jira_issue =  request.referrer.nil? ? nil : request.referrer.split('/').last
+  jira_issue =  request.referrer.nil? ? nil : request.referrer.split('/').last.split("?").first
   session[:jira_issue] = !jira_issue.nil? ? jira_issue : "JIRA-BRANCH"
 
   $fqdn = params[:xdm_e].nil? ? "" : params[:xdm_e]
