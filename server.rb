@@ -4,38 +4,49 @@ require 'json'
 require 'active_support/all'
 require 'octokit'
 require 'sinatra'
+require 'yaml'
 
 $stdout.sync = true
 
 begin
-  GITHUB_CLIENT_ID = ENV.fetch("GITHUB_CLIENT_ID")
-  GITHUB_CLIENT_SECRET =  ENV.fetch("GITHUB_CLIENT_SECRET")
-  GITHUB_APP_KEY = ENV.fetch("GITHUB_APP_KEY")
-  GITHUB_APP_ID = ENV.fetch("GITHUB_APP_ID")
-rescue KeyError
-  $stderr.puts "To run this script, please set the following environment variables:"
-  $stderr.puts "- GITHUB_CLIENT_ID: GitHub Developer Application Client ID"
-  $stderr.puts "- GITHUB_CLIENT_SECRET: GitHub Developer Application Client Secret"
-  $stderr.puts "- GITHUB_APP_KEY: GitHub App Private Key"
-  $stderr.puts "- GITHUB_APP_ID: GitHub App ID"
-  exit 1
+  yml = File.open('jira-bot.yaml')
+  contents = YAML.load(yml)
+
+  GITHUB_CLIENT_ID = contents["client_id"]
+  GITHUB_CLIENT_SECRET = contents["client_secret"]
+  GITHUB_APP_KEY = File.read(contents["private_key"])
+  GITHUB_APP_ID = contents["app_id"]
+rescue
+  begin
+    GITHUB_CLIENT_ID = ENV.fetch("GITHUB_CLIENT_ID")
+    GITHUB_CLIENT_SECRET =  ENV.fetch("GITHUB_CLIENT_SECRET")
+    GITHUB_APP_KEY = ENV.fetch("GITHUB_APP_KEY")
+    GITHUB_APP_ID = ENV.fetch("GITHUB_APP_ID")
+  rescue KeyError
+    $stderr.puts "To run this script, please set the following environment variables:"
+    $stderr.puts "- GITHUB_CLIENT_ID: GitHub Developer Application Client ID"
+    $stderr.puts "- GITHUB_CLIENT_SECRET: GitHub Developer Application Client Secret"
+    $stderr.puts "- GITHUB_APP_KEY: GitHub App Private Key"
+    $stderr.puts "- GITHUB_APP_ID: GitHub App ID"
+    exit 1
+  end
 end
 
 configure do
-    enable :cross_origin
+  enable :cross_origin
 end
 
 before do
-    response.headers['Access-Control-Allow-Origin'] = 'https://*.atlassian.net'
+  response.headers['Access-Control-Allow-Origin'] = 'https://*.atlassian.net'
 end
 
 options "*" do
-    response.headers["Allow"] = "GET, POST, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Accept, X-User-Email, X-Auth-Token"
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["X-Content-Security-Policy"] = "frame-ancestors https://*.atlassian.net";
-    response.headers["Content-Security-Policy"] = "frame-ancestors https://*.atlassian.net";
-    200
+  response.headers["Allow"] = "GET, POST, OPTIONS"
+  response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Accept, X-User-Email, X-Auth-Token"
+  response.headers["Access-Control-Allow-Origin"] = "*"
+  response.headers["X-Content-Security-Policy"] = "frame-ancestors https://*.atlassian.net";
+  response.headers["Content-Security-Policy"] = "frame-ancestors https://*.atlassian.net";
+  200
 end
 
 use Rack::Session::Cookie, :secret => rand.to_s()
