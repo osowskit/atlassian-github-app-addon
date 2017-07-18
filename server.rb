@@ -16,18 +16,21 @@ begin
   GITHUB_CLIENT_SECRET = contents["client_secret"]
   GITHUB_APP_KEY = File.read(contents["private_key"])
   GITHUB_APP_ID = contents["app_id"]
+  GITHUB_APP_URL = contents["app_url"]
 rescue
   begin
     GITHUB_CLIENT_ID = ENV.fetch("GITHUB_CLIENT_ID")
     GITHUB_CLIENT_SECRET =  ENV.fetch("GITHUB_CLIENT_SECRET")
     GITHUB_APP_KEY = ENV.fetch("GITHUB_APP_KEY")
     GITHUB_APP_ID = ENV.fetch("GITHUB_APP_ID")
+    GITHUB_APP_URL = ENV.fetch("GITHUB_APP_URL")
   rescue KeyError
     $stderr.puts "To run this script, please set the following environment variables:"
     $stderr.puts "- GITHUB_CLIENT_ID: GitHub Developer Application Client ID"
     $stderr.puts "- GITHUB_CLIENT_SECRET: GitHub Developer Application Client Secret"
     $stderr.puts "- GITHUB_APP_KEY: GitHub App Private Key"
     $stderr.puts "- GITHUB_APP_ID: GitHub App ID"
+    $stderr.puts "- GITHUB_APP_URL: GitHub App URL"
     exit 1
   end
 end
@@ -51,13 +54,14 @@ end
 
 use Rack::Session::Cookie, :secret => rand.to_s()
 set :protection, :except => :frame_options
+set :public_folder, 'public'
 Octokit.default_media_type = "application/vnd.github.machine-man-preview+json"
 
 # Sinatra Endpoints
 # -----------------
 client = Octokit::Client.new
 
-get '/callback' do 
+get '/callback' do
   session_code = params[:code]
   result = Octokit.exchange_code_for_token(session_code, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET)
   session[:access_token] = result[:access_token]
@@ -86,11 +90,11 @@ get '/' do
     end
     return erb :authorize
   else
-    
     if !set_app_token?
       if session[:installation_id].nil?
         session[:installation_id] = get_user_installations(session[:access_token])
         if session[:installation_id].nil?
+          @app_url = GITHUB_APP_URL
           return erb :install_app
         end
       end
@@ -99,13 +103,13 @@ get '/' do
       redirect to('/')
     else
       if !set_repo?
-        @name_list = [] 
+        @name_list = []
         # Get all repositories a user has write access to
         repositories = get_app_repositories(session[:app_token])
 
         repositories.each do |repo|
-          @name_list.push(repo["full_name"]) 
-          # if repo["permissions"]["admin"] || repo["permissions"]["push"] 
+          @name_list.push(repo["full_name"])
+          # if repo["permissions"]["admin"] || repo["permissions"]["push"]
         end
         session[:name_list] = @name_list
         # Show end-user a list of all repositories they can create a branch in
@@ -113,7 +117,7 @@ get '/' do
       else
         if branch_exists?
           return erb :link_to_branch
-        end      
+        end
         @repo_name = session[:repo_name]
         return erb :create_branch
       end
@@ -155,21 +159,15 @@ get '/create_branch' do
   redirect to('/')
 end
 
-# Store which Repository the user selected 
+# Store which Repository the user selected
 get '/add_repo' do
   if !authenticated?
     redirect to('/')
   end
 
   input_repo = params[:repo_name]
-  session[:repo_name] = input_repo if session[:name_list].include? input_repo.to_s  
+  session[:repo_name] = input_repo if session[:name_list].include? input_repo.to_s
   redirect to('/')
-end
-
-# Public route to install Add-on from Atlassian
-get '/atlassian-connect.json' do
-  content_type :json
-  File.read(File.join('public', 'atlassian-connect.json'))
 end
 
 
@@ -186,7 +184,7 @@ def set_repo?
   !session[:repo_name].nil?
 end
 
-# Returns whether a branch for this issue already exists 
+# Returns whether a branch for this issue already exists
 def branch_exists?
   !session[:branch_name].nil?
 end
@@ -224,7 +222,7 @@ def get_user_installations(token)
     authorization: "token #{token}",
     accept: "application/vnd.github.machine-man-preview+json"
   }
-  
+
   response = RestClient.get(url,headers)
   json_response = JSON.parse(response)
 

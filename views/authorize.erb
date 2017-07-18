@@ -2,14 +2,17 @@
 <html lang="en">
   <head>
      <link rel="stylesheet" href="//aui-cdn.atlassian.com/aui-adg/5.9.12/css/aui.min.css" media="all">
+     <link rel="stylesheet" href="/css/github-app.css" media="all">
     <script src="<%= $fqdn %>/atlassian-connect/all.js"></script>
   </head>
    <body>
       <div class="ac-content">
-        <div class="aui-message aui-message-warning">
-              Please Authorize your plugin: <a href="<%= @url %> " target="_blank">authorization link</a>
-        </div>
-        <p><a href="/logout">clear settings</a></p>
+        <div class="github-dev-panel">
+          <div class="aui-message aui-message-warning">
+              Please Authorize your plugin: <a href="<%= @url %> ">authorization link</a>
+            </div>
+            <p><a href="/logout">clear settings</a></p>
+          </div>
       </div>
    </body>
 </html>
