@@ -2,14 +2,17 @@
 <html lang="en">
   <head>
      <link rel="stylesheet" href="//aui-cdn.atlassian.com/aui-adg/5.9.12/css/aui.min.css" media="all">
+     <link rel="stylesheet" href="/css/github-app.css" media="all">
     <script src="<%= $fqdn %>/atlassian-connect/all.js"></script>
   </head>
    <body>
       <div class="ac-content">
-        <div class="aui-message aui-message-info">
-              <a href="https://github.com/apps/jira-bot" target="_blank">Install the App</a></br>
+        <div class="github-dev-panel">
+          <div class="aui-message aui-message-info">
+                <a href="<%= @app_url %>" target="_blank">Install the App</a></br>
+          </div>
+          <a href="/logout">clear settings</a>
         </div>
-        <a href="/logout">clear settings</a>
       </div>
    </body>
 </html>
