@@ -13,7 +13,7 @@
    "modules": {
       "webPanels": [
          {
-            "url": "/main_entry",
+            "url": "/main_entry?issueKey={issue.key}",
             "key": "osowskit-app",
             "location": "atl.jira.view.issue.right.context",
             "name": {
