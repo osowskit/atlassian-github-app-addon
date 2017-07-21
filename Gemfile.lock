@@ -109,6 +109,13 @@ GEM
       rack (~> 1.4)
       rack-protection (~> 1.3)
       tilt (~> 1.3, >= 1.3.3)
+    sinatra-contrib (1.3.2)
+      backports (>= 2.0)
+      eventmachine
+      rack-protection
+      rack-test
+      sinatra (~> 1.3.0)
+      tilt (~> 1.3)
     sinatra-cross_origin (0.4.0)
     sprockets (3.7.1)
       concurrent-ruby (~> 1.0)
@@ -136,6 +143,7 @@ DEPENDENCIES
   rails
   rest-client
   sinatra (~> 1.3.5)
+  sinatra-contrib
   sinatra-cross_origin
 
 BUNDLED WITH
