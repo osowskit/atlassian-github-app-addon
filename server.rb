@@ -137,12 +137,10 @@ get '/' do
     
     # Authenticated but not viewing JIRA ticket
     if session[:jira_issue] == $default_branch_name
-      send_event(get_installation_cookie, "plugin", "show", "thank_you")
       return erb :thank_you
     end
 
     @repo_name = session[:repo_name]
-    send_event(get_installation_cookie, "plugin", "show", "create_branch")
     return erb :create_branch
   end
 end
@@ -153,7 +151,7 @@ post '/payload' do
   webhook_data = JSON.parse(request.body.read)
 
   if github_event == "installation" || github_event == "installation_repositories"
-    send_event(webhook_data["installation"]["id"], "installation", webhook_data["action"], "")
+    puts "installation event"
   else
     puts "New event #{github_event}"
   end
