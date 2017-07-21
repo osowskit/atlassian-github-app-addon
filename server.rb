@@ -297,16 +297,21 @@ def get_app_repositories(token)
     accept: "application/vnd.github.machine-man-preview+json"
   }
 
-  response = RestClient.get(url,headers)
-  json_response = JSON.parse(response)
-
   repository_list = []
-  if json_response["total_count"] > 0
-    json_response["repositories"].each do |repo|
-      repository_list.push(repo)
-    end
-  end
+  begin
+    response = RestClient.get(url,headers)
+    json_response = JSON.parse(response)
 
+    if json_response["total_count"] > 0
+      json_response["repositories"].each do |repo|
+        repository_list.push(repo)
+      end
+    end
+  rescue
+    # Likely a 401 so renew token
+    session[:app_token] = nil
+    redirect to('/')
+  end
   repository_list
 end
 
