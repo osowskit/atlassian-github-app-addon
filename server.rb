@@ -73,6 +73,12 @@ get '/callback' do
   redirect to('/')
 end
 
+# GitHub will include `installation_id` after installing the App
+get '/post_app_install' do
+  set_installation_cookie(params[:installation_id])
+  redirect to('/')
+end
+
 # Entry point for JIRA Add-on.
 # JIRA passes in a number of URL parameters https://goo.gl/zyGLiF
 get '/main_entry' do
