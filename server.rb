@@ -315,7 +315,7 @@ def get_app_repositories(token)
     end
   rescue
     # Likely a 401 so renew token
-    session.delete(:app_token)
+    session[:app_token] = nil
     redirect to('/')
   end
   repository_list
