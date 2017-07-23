@@ -73,6 +73,12 @@ get '/callback' do
   redirect to('/')
 end
 
+# GitHub will include `installation_id` after installing the App
+get '/post_app_install' do
+  set_installation_cookie(params[:installation_id])
+  redirect to('/')
+end
+
 # Entry point for JIRA Add-on.
 # JIRA passes in a number of URL parameters https://goo.gl/zyGLiF
 get '/main_entry' do
@@ -100,20 +106,25 @@ get '/' do
         @url = client.authorize_url(GITHUB_CLIENT_ID)
         return erb :authorize
       else
-        session[:installation_id] = get_user_installations(session[:access_token])
-
+        installation_id = get_user_installations(session[:access_token])
         # User does not have App installed
-        if session[:installation_id].nil?
+        if installation_id.nil?
           @app_url = GITHUB_APP_URL
           return erb :install_app
         end
-        set_installation_cookie(session[:installation_id])
+        set_installation_cookie(installation_id)
       end
     end
 
     # Generate GitHub App token
     token_url = "https://api.github.com/installations/#{get_installation_cookie}/access_tokens"
+    begin
     session[:app_token] = get_app_token(token_url)
+    rescue
+      # Something went wrong
+      redirect to('/logout')
+    end
+
     redirect to('/')
   end
 
@@ -159,14 +170,13 @@ end
 
 # Clear all session information
 get '/logout' do
-  session[:access_token] = nil
-  session[:repo_name] = nil
-  session[:name_list] = nil
-  session[:branch_name] = nil
-  session[:jira_issue] = nil
-  session[:installation_id] = nil
-  session[:app_token] = nil
-  cookies.delete("installation_id")
+  cookies[:installation_id] = nil
+  session.delete(:repo_name)
+  session.delete(:name_list)
+  session.delete(:app_token)
+  session.delete(:access_token)
+  puts session.inspect
+  puts cookies.inspect
   redirect to('/')
 end
 
@@ -207,12 +217,12 @@ end
 
 # Returns true if the user completed OAuth2 handshake and has a token
 def authenticated?
-  !session[:access_token].nil?
+  !session[:access_token].nil? && session[:access_token] != ''
 end
 
 # Returns whether the user selected a repository to map to this JIRA project
 def set_repo?
-  !session[:repo_name].nil?
+  !session[:repo_name].nil? && session[:repo_name] != ''
 end
 
 # Returns whether a branch for this issue already exists
@@ -231,16 +241,12 @@ def branch_exists?(jira_issue)
   return true
 end
 
-def installed_app?
-  !session[:installation_id].nil?
-end
-
 def set_app_token?
-  !session[:app_token].nil?
+  !session[:app_token].nil? && session[:app_token] != ''
 end
 
 def installation_cookie?
-  !cookies[:installation_id].nil?
+  !cookies[:installation_id].nil? && cookies[:installation_id] != ""
 end
 
 def set_installation_cookie(value)
@@ -297,16 +303,21 @@ def get_app_repositories(token)
     accept: "application/vnd.github.machine-man-preview+json"
   }
 
-  response = RestClient.get(url,headers)
-  json_response = JSON.parse(response)
-
   repository_list = []
-  if json_response["total_count"] > 0
-    json_response["repositories"].each do |repo|
-      repository_list.push(repo)
-    end
-  end
+  begin
+    response = RestClient.get(url,headers)
+    json_response = JSON.parse(response)
 
+    if json_response["total_count"] > 0
+      json_response["repositories"].each do |repo|
+        repository_list.push(repo)
+      end
+    end
+  rescue
+    # Likely a 401 so renew token
+    session.delete(:app_token)
+    redirect to('/')
+  end
   repository_list
 end
 
