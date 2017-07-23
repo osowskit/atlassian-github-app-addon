@@ -4,9 +4,14 @@ require 'json'
 require 'active_support/all'
 require 'octokit'
 require 'sinatra'
+require 'sinatra/cookies'
+require 'uri'
 require 'yaml'
 
 $stdout.sync = true
+$tamper_xor = 111111
+$fqdn = nil
+$default_branch_name = "JIRA-BOT-BRANCH"
 
 begin
   yml = File.open('jira-bot.yaml')
@@ -68,78 +73,116 @@ get '/callback' do
   redirect to('/')
 end
 
+# GitHub will include `installation_id` after installing the App
+get '/post_app_install' do
+  set_installation_cookie(params[:installation_id])
+  redirect to('/')
+end
+
 # Entry point for JIRA Add-on.
 # JIRA passes in a number of URL parameters https://goo.gl/zyGLiF
 get '/main_entry' do
-  # Handle loading outside of JIRA environment
-  jira_issue =  request.referrer.nil? ? nil : request.referrer.split('/').last.split("?").first
-  session[:jira_issue] = !jira_issue.nil? ? jira_issue : "JIRA-BRANCH"
-
+  # Used in templates to load JS and CSS
   $fqdn = params[:xdm_e].nil? ? "" : params[:xdm_e]
 
+  # JIRA ID is passed as context-parameters.
+  # Referenced in atlassian-connect.json
+  session[:jira_issue] = params.fetch("issueKey", $default_branch_name)
   redirect to('/')
 end
 
 # Main application logic
 get '/' do
-  # Ensure user is authenticated with OAuth token
-  if !authenticated?
-    @url = client.authorize_url(GITHUB_CLIENT_ID)
-    if session[:jira_issue].nil?
-      session[:jira_issue] = "JIRA-BOT-BRANCH"
-    end
-    return erb :authorize
-  else
-    if !set_app_token?
-      if session[:installation_id].nil?
-        session[:installation_id] = get_user_installations(session[:access_token])
-        if session[:installation_id].nil?
+  if session[:jira_issue].nil?
+    session[:jira_issue] = $default_branch_name
+  end
+
+  # Generate an GitHub App token from the user's installation
+  if !set_app_token?
+    # Do we have the App's installation id. If so, no user authentication needed
+    if !installation_cookie?
+      # Need user's OAuth token to lookup instllation id
+      if !authenticated?
+        @url = client.authorize_url(GITHUB_CLIENT_ID)
+        return erb :authorize
+      else
+        installation_id = get_user_installations(session[:access_token])
+        # User does not have App installed
+        if installation_id.nil?
           @app_url = GITHUB_APP_URL
           return erb :install_app
         end
-      end
-      token_url = "https://api.github.com/installations/#{session[:installation_id]}/access_tokens"
-      session[:app_token] = get_app_token(token_url)
-      redirect to('/')
-    else
-      if !set_repo?
-        @name_list = []
-        # Get all repositories a user has write access to
-        repositories = get_app_repositories(session[:app_token])
-
-        repositories.each do |repo|
-          @name_list.push(repo["full_name"])
-          # if repo["permissions"]["admin"] || repo["permissions"]["push"]
-        end
-        session[:name_list] = @name_list
-        # Show end-user a list of all repositories they can create a branch in
-        return erb :show_repos
-      else
-        if branch_exists?
-          return erb :link_to_branch
-        end
-        @repo_name = session[:repo_name]
-        return erb :create_branch
+        set_installation_cookie(installation_id)
       end
     end
+
+    # Generate GitHub App token
+    token_url = "https://api.github.com/installations/#{get_installation_cookie}/access_tokens"
+    begin
+    session[:app_token] = get_app_token(token_url)
+    rescue
+      # Something went wrong
+      redirect to('/logout')
+    end
+
+    redirect to('/')
+  end
+
+  if !set_repo?
+    @name_list = []
+    # Get all repositories a user has write access to
+    repositories = get_app_repositories(session[:app_token])
+
+    repositories.each do |repo|
+      @name_list.push(repo["full_name"])
+    end
+    session[:name_list] = @name_list
+    # Show end-user a list of all repositories they can create a branch in
+    return erb :show_repos
+  else
+
+    if branch_exists?(session[:jira_issue])
+      send_event(get_installation_cookie, "plugin", "show", "branch")
+      return erb :link_to_branch
+    end
+    
+    # Authenticated but not viewing JIRA ticket
+    if session[:jira_issue] == $default_branch_name
+      return erb :thank_you
+    end
+
+    @repo_name = session[:repo_name]
+    return erb :create_branch
+  end
+end
+
+#
+post '/payload' do
+  github_event = request.env['HTTP_X_GITHUB_EVENT']
+  webhook_data = JSON.parse(request.body.read)
+
+  if github_event == "installation" || github_event == "installation_repositories"
+    puts "installation event"
+  else
+    puts "New event #{github_event}"
   end
 end
 
 # Clear all session information
 get '/logout' do
-  session[:access_token] = nil
-  session[:repo_name] = nil
-  session[:name_list] = nil
-  session[:branch_name] = nil
-  session[:jira_issue] = nil
-  session[:installation_id] = nil
-  session[:app_token] = nil
+  cookies[:installation_id] = nil
+  session.delete(:repo_name)
+  session.delete(:name_list)
+  session.delete(:app_token)
+  session.delete(:access_token)
+  puts session.inspect
+  puts cookies.inspect
   redirect to('/')
 end
 
 # Create a branch for the selected repository if it doesn't already exist.
 get '/create_branch' do
-  if !authenticated? || !set_repo?
+  if !set_app_token? || !set_repo? || branch_exists?(session[:jira_issue])
     redirect to('/')
   end
   client = Octokit::Client.new(:access_token => session[:app_token] )
@@ -147,21 +190,19 @@ get '/create_branch' do
   repo_name = session[:repo_name]
   branch_name = session[:jira_issue]
   begin
-    # Does this branch exist
-    sha = client.ref(repo_name, "heads/#{branch_name}")
-    session[:branch_name] = branch_name
-  rescue Octokit::NotFound
-    # Create branch
+    # Create branch at tip of master
     sha = client.ref(repo_name, "heads/master")[:object][:sha]
     ref = client.create_ref(repo_name, "heads/#{branch_name}", sha.to_s)
-    session[:branch_name] = branch_name
+
+  rescue
+    puts "Failed to create branch #{branch_name}"
   end
   redirect to('/')
 end
 
 # Store which Repository the user selected
 get '/add_repo' do
-  if !authenticated?
+  if !set_app_token?
     redirect to('/')
   end
 
@@ -176,25 +217,47 @@ end
 
 # Returns true if the user completed OAuth2 handshake and has a token
 def authenticated?
-  !session[:access_token].nil?
+  !session[:access_token].nil? && session[:access_token] != ''
 end
 
 # Returns whether the user selected a repository to map to this JIRA project
 def set_repo?
-  !session[:repo_name].nil?
+  !session[:repo_name].nil? && session[:repo_name] != ''
 end
 
 # Returns whether a branch for this issue already exists
-def branch_exists?
-  !session[:branch_name].nil?
-end
+def branch_exists?(jira_issue)
+  client = Octokit::Client.new(:access_token => session[:app_token] )
 
-def installed_app?
-  !session[:installation_id].nil?
+  repo_name = session[:repo_name]
+  branch_name = jira_issue
+
+  begin
+    # Does this branch exist
+    sha = client.ref(repo_name, "heads/#{branch_name}")
+  rescue
+    return false
+  end
+  return true
 end
 
 def set_app_token?
-  !session[:app_token].nil?
+  !session[:app_token].nil? && session[:app_token] != ''
+end
+
+def installation_cookie?
+  !cookies[:installation_id].nil? && cookies[:installation_id] != ""
+end
+
+def set_installation_cookie(value)
+  tamper = value.to_i^$tamper_xor
+  cookies[:installation_id] = tamper
+end
+
+def get_installation_cookie
+  tamper = cookies[:installation_id]
+  tamper = tamper.to_i^$tamper_xor
+  tamper.to_s
 end
 
 # GitHub Apps helper methods
@@ -240,16 +303,21 @@ def get_app_repositories(token)
     accept: "application/vnd.github.machine-man-preview+json"
   }
 
-  response = RestClient.get(url,headers)
-  json_response = JSON.parse(response)
-
   repository_list = []
-  if json_response["total_count"] > 0
-    json_response["repositories"].each do |repo|
-      repository_list.push(repo)
-    end
-  end
+  begin
+    response = RestClient.get(url,headers)
+    json_response = JSON.parse(response)
 
+    if json_response["total_count"] > 0
+      json_response["repositories"].each do |repo|
+        repository_list.push(repo)
+      end
+    end
+  rescue
+    # Likely a 401 so renew token
+    session[:app_token] = nil
+    redirect to('/')
+  end
   repository_list
 end
 
