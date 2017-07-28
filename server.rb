@@ -77,7 +77,11 @@ end
 
 # GitHub will include `installation_id` after installing the App
 get '/post_app_install' do
-  # Potentially redirect to session[:fqdn]
+  # Send the user back to JIRA
+  if !session[:referrer].nil? && session[:referrer] != ''
+    redirect session[:referrer]
+  end
+
   redirect to('/')
 end
 
@@ -86,6 +90,8 @@ end
 get '/main_entry' do
   # Used in templates to load JS and CSS
   session[:fqdn] = params[:xdm_e].nil? ? "" : params[:xdm_e]
+  session[:referrer] = request.referer
+
   # JIRA ID is passed as context-parameters.
   # Referenced in atlassian-connect.json
   session[:jira_issue] = params.fetch("issueKey", $default_branch_name)
