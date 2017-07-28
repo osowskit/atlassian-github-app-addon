@@ -10,7 +10,6 @@ require 'yaml'
 
 $stdout.sync = true
 $tamper_xor = 111111
-$fqdn = nil
 $default_branch_name = "JIRA-BOT-BRANCH"
 
 begin
@@ -83,8 +82,7 @@ end
 # JIRA passes in a number of URL parameters https://goo.gl/zyGLiF
 get '/main_entry' do
   # Used in templates to load JS and CSS
-  $fqdn = params[:xdm_e].nil? ? "" : params[:xdm_e]
-
+  session[:fqdn] = params[:xdm_e].nil? ? "" : params[:xdm_e]
   # JIRA ID is passed as context-parameters.
   # Referenced in atlassian-connect.json
   session[:jira_issue] = params.fetch("issueKey", $default_branch_name)
@@ -119,13 +117,11 @@ get '/' do
     # Generate GitHub App token
     token_url = "https://api.github.com/installations/#{get_installation_cookie}/access_tokens"
     begin
-    session[:app_token] = get_app_token(token_url)
+      session[:app_token] = get_app_token(token_url)
     rescue
       # Something went wrong
       redirect to('/logout')
     end
-
-    redirect to('/')
   end
 
   if !set_repo?
@@ -175,8 +171,6 @@ get '/logout' do
   session.delete(:name_list)
   session.delete(:app_token)
   session.delete(:access_token)
-  puts session.inspect
-  puts cookies.inspect
   redirect to('/')
 end
 
@@ -196,6 +190,7 @@ get '/create_branch' do
 
   rescue
     puts "Failed to create branch #{branch_name}"
+    redirect to('/logout')
   end
   redirect to('/')
 end
@@ -332,20 +327,4 @@ def get_app_token(access_tokens_url)
 
   app_token = JSON.parse(response)
   app_token["token"]
-end
-
-# Octokit methods
-# -----------------
-
-def create_issues(access_token, repositories, sender_username)
-  client = Octokit::Client.new(access_token: access_token )
-  client.default_media_type = "application/vnd.github.machine-man-preview+json"
-
-  repositories.each do |repo|
-    begin
-      client.create_issue(repo, "#{sender_username} created new app!", "Added GitHub App")
-    rescue
-      puts "no issues in this repository"
-    end
-  end
 end
