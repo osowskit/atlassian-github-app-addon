@@ -3,7 +3,7 @@
   <head>
      <link rel="stylesheet" href="//aui-cdn.atlassian.com/aui-adg/5.9.12/css/aui.min.css" media="all">
      <link rel="stylesheet" href="/css/github-app.css" media="all">
-    <script src="<%= $fqdn %>/atlassian-connect/all.js"></script>
+    <script src="<%= session[:fqdn] %>/atlassian-connect/all.js"></script>
   </head>
    <body>
       <div class="ac-content">
@@ -11,7 +11,7 @@
           <p class="title">
             Choose which Repository to create branches in:</br> 
             <% @name_list.each do | val | %>
-              <a href="/add_repo?repo_name=<%= val %>"><%= val %></a></br>
+              <a href="/add_repo?repo_name=<%= val[:full_name] %>"><%= val[:full_name] %></a></br>
             <% end %>
           </p>
           <a href="/logout">clear settings</a>

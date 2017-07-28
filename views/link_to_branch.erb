@@ -3,14 +3,14 @@
   <head>
      <link rel="stylesheet" href="//aui-cdn.atlassian.com/aui-adg/5.9.12/css/aui.min.css" media="all">
      <link rel="stylesheet" href="/css/github-app.css" media="all">
-    <script src="<%= $fqdn %>/atlassian-connect/all.js"></script>
+    <script src="<%= session[:fqdn] %>/atlassian-connect/all.js"></script>
   </head>
    <body>
       <div class="ac-content">
         <div class="github-dev-panel">
           <div class="aui-message aui-message-info">
             <p class="title">
-              View <a href="https://github.com/<%= session[:repo_name] %>/tree/<%= session[:jira_issue] %>" target="_blank">branch</a> on GitHub
+              View <a href="https://github.com/<%= session[:repo_name][:full_name] %>/tree/<%= session[:jira_issue] %>" target="_blank">branch</a> on GitHub
             </p>
          </div>
          <a href="/logout">clear settings</a>
