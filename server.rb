@@ -226,7 +226,7 @@ def branch_exists?(jira_issue)
 end
 
 def get_event_session_id
-  if session[:user_session_id].nil? or session[:user_session_id] = ''
+  if session[:user_session_id].nil? || session[:user_session_id] == ''
     session[:user_session_id] = SecureRandom.hex(8)
   end
   session[:user_session_id]
