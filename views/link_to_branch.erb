@@ -10,7 +10,7 @@
         <div class="github-dev-panel">
           <div class="aui-message aui-message-info">
             <p class="title">
-              View <a href="https://github.com/<%= session[:repo_name] %>/tree/<%= session[:jira_issue] %>" target="_blank">branch</a> on GitHub
+              View <a href="https://github.com/<%= session[:repo_name][:full_name] %>/tree/<%= session[:jira_issue] %>" target="_blank">branch</a> on GitHub
             </p>
          </div>
          <a href="/logout">clear settings</a>

@@ -11,7 +11,7 @@
           <p class="title">
             Choose which Repository to create branches in:</br> 
             <% @name_list.each do | val | %>
-              <a href="/add_repo?repo_name=<%= val %>"><%= val %></a></br>
+              <a href="/add_repo?repo_name=<%= val[:full_name] %>"><%= val[:full_name] %></a></br>
             <% end %>
           </p>
           <a href="/logout">clear settings</a>
