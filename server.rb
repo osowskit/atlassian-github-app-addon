@@ -78,8 +78,12 @@ end
 
 # GitHub will include `installation_id` after installing the App
 get '/post_app_install' do
-  # Potentially redirect to session[:fqdn]
-  redirect to('/')
+  # Send the user back to JIRA
+  if !session[:referrer].nil? && session[:referrer] != ''
+    redirect session[:referrer]
+  end
+
+  return erb :close
 end
 
 # Entry point for JIRA Add-on.

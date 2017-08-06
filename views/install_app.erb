@@ -4,12 +4,36 @@
      <link rel="stylesheet" href="//aui-cdn.atlassian.com/aui-adg/5.9.12/css/aui.min.css" media="all">
      <link rel="stylesheet" href="/css/github-app.css" media="all">
     <script src="<%= session[:fqdn] %>/atlassian-connect/all.js"></script>
+    <script>
+      var oauthWindow;
+      function showInstallApp() {
+        var left =
+            window.screenX + (window.outerWidth / 2) - (this._popupWidth / 2);
+        var top =
+            window.screenY + (window.outerHeight / 2) - (this._popupHeight / 2);
+        var windowFeatures = 'width=' + this._popupWidth +
+            ',height=' + this._popupHeight +
+            ',top=' + top +
+            ',left=' + left +
+            ',location=no,toolbar=no,menubar=no';
+        oauthWindow = window.open("<%= @app_url %>", this.WINDOW_NAME, windowFeatures);
+        return false;
+      }
+      function popupCloseNotification() {
+        window.setTimeout(function() {
+          if (oauthWindow.closed) {
+            window.location.replace("/");
+          }
+        }, 1);
+      }
+    </script>
   </head>
    <body>
       <div class="ac-content">
         <div class="github-dev-panel">
           <div class="aui-message aui-message-info">
-                <a href="<%= @app_url %>" target="_blank">Install the App</a></br>
+            <a href="javascript:showInstallApp()">Install the App</a>
+            </br>
           </div>
           <a href="/logout">clear settings</a>
         </div>
