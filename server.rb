@@ -72,7 +72,8 @@ get '/callback' do
   session_code = params[:code]
   result = Octokit.exchange_code_for_token(session_code, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET)
   session[:access_token] = result[:access_token]
-  redirect to('/')
+
+  return erb :close
 end
 
 # GitHub will include `installation_id` after installing the App
@@ -101,7 +102,7 @@ get '/' do
   # Need user's OAuth token to lookup installation id
   if !authenticated?
     @url = client.authorize_url(GITHUB_CLIENT_ID)
-    return erb :authorize
+    return erb :login
   end
 
   if !set_repo?
@@ -226,8 +227,9 @@ def branch_exists?(jira_issue)
 end
 
 def get_event_session_id
-  if session[:user_session_id].nil? or session[:user_session_id] = ''
-    session[:user_session_id] = SecureRandom.hex(8)
+  if session[:user_session_id].nil? || session[:user_session_id] == '' 
+    session[:user_session_id] = SecureRandom.uuid()
+    puts "Created session id #{session[:user_session_id]}"
   end
   session[:user_session_id]
 end

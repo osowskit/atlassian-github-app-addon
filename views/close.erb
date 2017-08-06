@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="//aui-cdn.atlassian.com/aui-adg/5.9.12/css/aui.min.css" media="all">
+    <link rel="stylesheet" href="/css/github-app.css" media="all">
+    <script src="<%= session[:fqdn] %>/atlassian-connect/all.js"></script>
+    <script>
+    window.onunload = function() {
+      var win = window.opener;
+      if (!win.closed) {
+          win.popupCloseNotification();
+      }
+    };
+    window.close();
+    </script>
+    <title>GitHub Branch Selector</title>
+</head>
+   <body>
+      <div class="ac-content">
+        <div class="github-dev-panel">
+          <div class="aui-message aui-message-info">
+              Thank you for Authenticating. Please close this window.
+          </div>
+          <p><a href="/logout">clear settings</a></p>
+        </div>
+      </div>
+   </body>
+</html>
