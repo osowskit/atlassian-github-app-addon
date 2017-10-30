@@ -168,8 +168,12 @@ get '/create_branch' do
   repo_name = session[:repo_name][:full_name]
   branch_name = session[:jira_issue]
   begin
-    # Create branch at tip of master
-    sha = client.ref(repo_name, "heads/master")[:object][:sha]
+    # Look up default branch
+    repo_data = client.repository(repo_name)
+    default_branch = repo_data[:default_branch]
+
+    # Create branch at tip of the default branch
+    sha = client.ref(repo_name, "heads/#{default_branch}")[:object][:sha]
     ref = client.create_ref(repo_name, "heads/#{branch_name}", sha.to_s)
 
   rescue
