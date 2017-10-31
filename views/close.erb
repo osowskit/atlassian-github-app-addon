@@ -8,7 +8,8 @@
     window.onunload = function() {
       var win = window.opener;
       if (!win.closed) {
-          win.popupCloseNotification();
+          // Reload main page
+          window.opener.location.replace("/");
       }
     };
     window.close();

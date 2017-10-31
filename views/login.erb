@@ -19,13 +19,7 @@
         oauthWindow = window.open("<%= @url %>", this.WINDOW_NAME, windowFeatures);
         return false;
       }
-      function popupCloseNotification() {
-        window.setTimeout(function() {
-          if (oauthWindow.closed) {
-            window.location.replace("/");
-          }
-        }, 1);
-      }
+
     </script> 
     <script src="<%= session[:fqdn] %>/atlassian-connect/all.js"></script>
     <title>GitHub Branch Selector</title>

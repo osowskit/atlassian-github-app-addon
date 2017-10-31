@@ -19,13 +19,6 @@
         oauthWindow = window.open("<%= @app_url %>", this.WINDOW_NAME, windowFeatures);
         return false;
       }
-      function popupCloseNotification() {
-        window.setTimeout(function() {
-          if (oauthWindow.closed) {
-            window.location.replace("/");
-          }
-        }, 1);
-      }
     </script>
   </head>
    <body>
