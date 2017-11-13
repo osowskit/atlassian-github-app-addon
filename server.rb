@@ -62,6 +62,7 @@ end
 use Rack::Session::Cookie, :secret => COOKIE_SECRET.to_s()
 set :protection, :except => :frame_options
 set :public_folder, 'public'
+set :static_cache_control, [:public, :max_age => 2678400]
 Octokit.default_media_type = "application/vnd.github.machine-man-preview+json"
 
 # Sinatra Endpoints
