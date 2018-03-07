@@ -61,17 +61,20 @@ GEM
     mime-types (3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
-    mini_portile2 (2.2.0)
+    mini_portile2 (2.3.0)
     minitest (5.10.2)
     multipart-post (2.0.0)
     netrc (0.11.0)
-    nokogiri (1.8.0)
-      mini_portile2 (~> 2.2.0)
-    octokit (4.7.0)
+    newrelic_rpm (4.4.0.336)
+    nokogiri (1.8.2)
+      mini_portile2 (~> 2.3.0)
+    octokit (4.8.0)
       sawyer (~> 0.8.0, >= 0.5.3)
-    public_suffix (2.0.5)
-    rack (1.6.8)
-    rack-protection (1.5.3)
+    p3p (2.0.0)
+      rack (>= 1.6.2)
+    public_suffix (3.0.1)
+    rack (1.6.9)
+    rack-protection (1.5.5)
       rack
     rack-test (0.6.3)
       rack (>= 1.0)
@@ -149,4 +152,8 @@ DEPENDENCIES
   sinatra-cross_origin
 
 BUNDLED WITH
+<<<<<<< HEAD
    1.15.2
+=======
+   1.16.1
+>>>>>>> 2342cba... Upgrade dependencies
