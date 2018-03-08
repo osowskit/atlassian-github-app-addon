@@ -152,8 +152,4 @@ DEPENDENCIES
   sinatra-cross_origin
 
 BUNDLED WITH
-<<<<<<< HEAD
-   1.15.2
-=======
    1.16.1
->>>>>>> 2342cba... Upgrade dependencies
