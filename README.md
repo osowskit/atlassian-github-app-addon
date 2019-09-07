@@ -1,4 +1,4 @@
-# atlassian-github-app-addon
+# Create GitHub Branches from Jira
 
 ## Usage
 
@@ -19,3 +19,25 @@ This [Atlassian Marketplace add-on](https://marketplace.atlassian.com/plugins/co
 * View any Pull Request for the branch
 
 <img src="https://user-images.githubusercontent.com/768821/32191639-0bb9e878-bd6f-11e7-9fb2-7b85b5f0328b.png" width="350">
+
+## Custom Branch Names
+
+The default branch patter will use the issue key as the branch name and create this off of `master`. It is possible to set a GitFlow branching pattern and also use a custom branch name.
+
+### GitFlow
+
+Users can select the GitFlow branching pattern in the config file that will create a feature branch off of the `develop` branch, e.g. `feature/SENG-1234`. For each repository that uses this pattern:
+
+1. Add the following file `.github/jira-bot.yaml` to `master`
+1. Set the file contents to be `branch_pattern: 1`
+1. In Jira with the plugin loaded, remove and re-add each repository that has been updated. (The branch pattern is cached and needs to be refreshed).
+
+### Custom Branch 
+
+Users can choose to manually enter the branch name in the config file that will create a new branch off of the `master` branch, e.g. `SENG-1234/my-great-feature`. For each repository that uses this pattern:
+
+1. Add the following file `.github/jira-bot.yaml` to `master`
+1. Set the file contents to be `branch_pattern: 2`
+1. In Jira with the plugin loaded, remove and re-add each repository that has been updated. (The branch pattern is cached and needs to be refreshed).
+
+[Example yaml file](https://github.com/osowskit/an-repo/blob/master/.github/jira-bot.yaml)
