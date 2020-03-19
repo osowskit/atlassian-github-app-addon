@@ -1,6 +1,61 @@
+Customer Terms
+
+This document serves as an agreement that you - an individual or corporation -
+have the right to access and use the service - Create GitHub Branches from Jira.
+We own this running service and all intelectual property. Rights to the source
+code follow below.
+
+A. Shared Usage
+
+You agree by installing this add-on - https://marketplace.atlassian.com/1217260 -
+all users that have access to this service are also bound to this contract.
+
+B. Risk
+
+This service is provided as-is and without warranty or guarantee. There is risk
+associated with linking your personal/corporate accounts with any third party 
+system and, by installing this Add-on and GitHub App (jira-bot), you acknowledge
+and assume the responsibility for the potential for data loss and data 
+exfiltration.
+
+This service should not be used for critical services or depended upon for the
+continuation of your business.
+
+C. Usage 
+
+You can use this service in a corporate environment or in for-profit settings 
+when licensing the product. You may use the service as long as it is licensed 
+and have a right to use the service. We own the service.
+
+D. Availability
+
+You acknowlege that this service will not have 100% uptime and may be
+unavailable for extended periods of time for regular maintenance. This
+service may also be discontinued after a 30 day notice.
+
+E. Pricing
+
+The pricing reflected on the marketplace listing has factored in uptime and
+limits to availability. For the latest pricing, please refer to the marketplace
+listing.
+
+F. Features and Bugs
+
+By licensing and paying for this service, you agree to trial the service
+prior to purchasing. Features and bug reports will be considered but you 
+agree there is no requirement that these will be fixed or implemented. 
+Not all browsers or OSs will be supported. If you are dissatisfied, it 
+is your right to cancel the service.
+
+G. Abuse
+
+We reserve the right to block or suspend service to users that exhibit
+abusive behavior or acting in bad faith.
+
+
 MIT License
 
-Copyright (c) 2017 Tom Osowski
+Copyright (c) 2020 Tom Osowski
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
