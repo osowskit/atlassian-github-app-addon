@@ -95,7 +95,7 @@ GEM
       domain_name (~> 0.5)
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
-    json (1.8.6)
+    json (2.5.1)
     jwt (2.1.0)
     loofah (2.10.0)
       crass (~> 1.0.2)
@@ -226,7 +226,7 @@ DEPENDENCIES
   atlassian-jwt
   dotenv
   graphql-client
-  json (~> 1.8)
+  json (>= 2.3.0)
   newrelic_rpm
   octicons
   octicons_helper
@@ -243,7 +243,7 @@ DEPENDENCIES
   sinatra-redis
 
 RUBY VERSION
-   ruby 2.7.0p0
+   ruby 2.7.3p183
 
 BUNDLED WITH
    1.17.1
