@@ -42,6 +42,16 @@ Users can select the GitFlow branching pattern in the config file that will crea
 1. Set the file contents to be `branch_pattern: 1`
 1. In Jira with the plugin loaded, remove and re-add each repository that has been updated. (The branch pattern is cached and needs to be refreshed).
 
+### GitFlow + Custom Branch Name (deprecated)
+
+Users can select the GitFlow branching pattern in the config file that will create a feature branch off of the `develop` branch, e.g. `feature/SENG-1234`. This option allows users to also set the branch name via the UI. This setting is deprecated and users should set `branch_pattern: 3` and `default_base_branch_name: 'develop'` going forward.
+
+For each repository, use this pattern:
+
+1. Add the following file `.github/jira-bot.yaml` to the Repository's default branch
+1. Set the file contents to be `branch_pattern: 3`
+1. In Jira with the plugin loaded, remove and re-add each repository that has been updated. (The branch pattern is cached and needs to be refreshed).
+
 ### Custom Base Branch
 
 Teams that have branching patterns that are created off a branch that isn't the Repository's default branch. The following configuration allows users to set the base branch where new branches are created from. 
